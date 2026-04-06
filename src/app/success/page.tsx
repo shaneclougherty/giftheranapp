@@ -1,10 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { supabase } from '@/lib/supabase'
 
-export default function SuccessPage() {
+export const dynamic = 'force-dynamic'
+
+function SuccessContent() {
   const searchParams = useSearchParams()
   const appId = searchParams.get('app_id')
   const [app, setApp] = useState<any>(null)
@@ -215,5 +217,12 @@ export default function SuccessPage() {
 
       </div>
     </div>
+  )
+}
+export default function SuccessPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><div className="animate-pulse text-gray-400">Loading...</div></div>}>
+      <SuccessContent />
+    </Suspense>
   )
 }
