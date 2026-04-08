@@ -129,6 +129,9 @@ export default function RedeemCouponPage() {
 
       setApp(appData)
 
+      // Cache theme so loading screens match on subsequent navigations
+      try { sessionStorage.setItem(`theme:${slug}`, appData.theme) } catch {}
+
       const { data: couponData, error: couponError } = await supabase
         .from('coupons')
         .select('*')
@@ -266,9 +269,12 @@ export default function RedeemCouponPage() {
   }
 
   if (loading) {
+    let cachedTheme: string | null = null
+    try { cachedTheme = sessionStorage.getItem(`theme:${slug}`) } catch {}
+    const t = themes[cachedTheme || ''] || themes.rose_gold
     return (
-      <div className="min-h-screen flex items-center justify-center bg-pink-50">
-        <div className="animate-pulse text-pink-400 text-lg">Loading...</div>
+      <div className={`min-h-screen flex items-center justify-center ${t.bg}`}>
+        <div className={`animate-pulse ${t.subtext} text-lg`}>Loading...</div>
       </div>
     )
   }
@@ -299,7 +305,7 @@ export default function RedeemCouponPage() {
     const canContinue = selectedOptions.length > 0
 
     return (
-      <div className={`min-h-screen ${theme.bg} pb-8`}>
+      <div className={`min-h-screen ${theme.bg} pb-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
         <div className="pt-8 pb-1 px-6 text-center">
           <h1 className={`text-2xl font-bold ${theme.text} mb-1`}>
             {app.her_name}&apos;s Coupon Dashboard
@@ -367,7 +373,7 @@ export default function RedeemCouponPage() {
   // ==========================================
   if (step === 'details') {
     return (
-      <div className={`min-h-screen ${theme.bg} pb-8`}>
+      <div className={`min-h-screen ${theme.bg} pb-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
         <div className="pt-8 pb-1 px-6 text-center">
           <h1 className={`text-2xl font-bold ${theme.text} mb-1`}>
             {app.her_name}&apos;s Coupon Dashboard
@@ -424,7 +430,7 @@ export default function RedeemCouponPage() {
   // ==========================================
   if (step === 'best_boyfriend') {
     return (
-      <div className={`min-h-screen ${theme.bg} pb-8`}>
+      <div className={`min-h-screen ${theme.bg} pb-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
         <div className="pt-8 pb-1 px-6 text-center">
           <h1 className={`text-2xl font-bold ${theme.text} mb-1`}>
             {app.her_name}&apos;s Coupon Dashboard
@@ -464,7 +470,7 @@ export default function RedeemCouponPage() {
   // ==========================================
   if (step === 'confirming') {
     return (
-      <div className={`min-h-screen ${theme.bg} flex items-center justify-center`}>
+      <div className={`min-h-screen ${theme.bg} flex items-center justify-center transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
         <div className="text-center animate-pulse">
           <div className="text-6xl mb-4">💕</div>
           <p className={`text-lg font-medium ${theme.text}`}>Redeeming your coupon...</p>
@@ -480,7 +486,7 @@ export default function RedeemCouponPage() {
     const finalDetails = buildDetailsString()
 
     return (
-      <div className={`min-h-screen ${theme.bg} pb-8`}>
+      <div className={`min-h-screen ${theme.bg} pb-8 transition-opacity duration-500 ${fadeIn ? 'opacity-100' : 'opacity-0'}`}>
         <div className="pt-8 pb-1 px-6 text-center">
           <h1 className={`text-2xl font-bold ${theme.text} mb-1`}>
             {app.her_name}&apos;s Coupon Dashboard

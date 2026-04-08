@@ -174,6 +174,7 @@ export default function GirlfriendDashboard() {
   const [coupons, setCoupons] = useState<any[]>([])
   const [photos, setPhotos] = useState<string[]>([])
   const [loading, setLoading] = useState(true)
+  const [contentReady, setContentReady] = useState(false)
   const [error, setError] = useState(false)
   const [headerVisible, setHeaderVisible] = useState(false)
   const [photoVisible, setPhotoVisible] = useState(false)
@@ -196,6 +197,9 @@ export default function GirlfriendDashboard() {
 
       setApp(appData)
 
+      // Cache theme so loading screens match on subsequent navigations
+      try { sessionStorage.setItem(`theme:${slug}`, appData.theme) } catch {}
+
       const { data: couponData } = await supabase
         .from('coupons')
         .select('*')
@@ -215,7 +219,8 @@ export default function GirlfriendDashboard() {
 
       setLoading(false)
 
-      // Staggered reveal animation
+      // Fade content in, then stagger child reveals
+      requestAnimationFrame(() => setContentReady(true))
       setTimeout(() => setHeaderVisible(true), 100)
       setTimeout(() => setPhotoVisible(true), 300)
       setTimeout(() => setSectionVisible(true), 500)
@@ -225,9 +230,12 @@ export default function GirlfriendDashboard() {
   }, [slug])
 
   if (loading) {
+    let cachedTheme: string | null = null
+    try { cachedTheme = sessionStorage.getItem(`theme:${slug}`) } catch {}
+    const t = themes[cachedTheme || ''] || themes.rose_gold
     return (
-      <div className="min-h-screen flex items-center justify-center bg-pink-50">
-        <div className="animate-pulse text-pink-400 text-lg">Loading your app...</div>
+      <div className={`min-h-screen flex items-center justify-center ${t.bg}`}>
+        <div className={`animate-pulse ${t.subtext} text-lg`}>Loading your app...</div>
       </div>
     )
   }
@@ -268,7 +276,7 @@ export default function GirlfriendDashboard() {
   }
 
   return (
-    <div className={`min-h-screen ${theme.bg} pb-12`}>
+    <div className={`min-h-screen ${theme.bg} pb-12 transition-opacity duration-500 ${contentReady ? 'opacity-100' : 'opacity-0'}`}>
 
       {/* Title and subtitle */}
       <div className={`pt-12 pb-2 px-6 text-center transition-all duration-500 ${
