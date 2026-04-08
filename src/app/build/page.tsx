@@ -46,16 +46,7 @@ function Slideshow({ photos, themeObj, size = 'w-24 h-24' }: { photos: string[];
   )
   return (
     <div className={`${size} mx-auto rounded-xl border-2 ${themeObj.iconBorder} overflow-hidden mb-3 shadow relative`}>
-      {filtered.map((url, i) => (
-        <img key={url} src={url} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-1000 ${i === (current % filtered.length) ? 'opacity-100' : 'opacity-0'}`} />
-      ))}
-      {filtered.length > 1 && (
-        <div className="absolute bottom-1.5 left-0 right-0 flex justify-center gap-1">
-          {filtered.map((_, i) => (
-            <div key={i} className={`w-1.5 h-1.5 rounded-full transition-all ${i === (current % filtered.length) ? 'bg-white' : 'bg-white/40'}`} />
-          ))}
-        </div>
-      )}
+      
     </div>
   )
 }

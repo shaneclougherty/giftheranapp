@@ -90,18 +90,6 @@ function PhotoSlideshow({ photos, theme }: { photos: string[]; theme: typeof the
           }`}
         />
       ))}
-      {photos.length > 1 && (
-        <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1.5">
-          {photos.map((_, i) => (
-            <div
-              key={i}
-              className={`w-2 h-2 rounded-full transition-all ${
-                i === current ? 'bg-white scale-110' : 'bg-white/50'
-              }`}
-            />
-          ))}
-        </div>
-      )}
     </div>
   )
 }
