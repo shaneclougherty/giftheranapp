@@ -1,7 +1,123 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import PhotoUploader from '@/components/PhotoUploader'
+import { supabase } from '@/lib/supabase'
+
+// Auto-crop an image file to a center square (800×800) and return a JPEG blob
+async function autoCropToSquare(file: File): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.onload = () => {
+      const size = Math.min(img.width, img.height)
+      const x = (img.width - size) / 2
+      const y = (img.height - size) / 2
+
+      const canvas = document.createElement('canvas')
+      canvas.width = 800
+      canvas.height = 800
+      const ctx = canvas.getContext('2d')!
+      ctx.drawImage(img, x, y, size, size, 0, 0, 800, 800)
+
+      canvas.toBlob(
+        (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),
+        'image/jpeg',
+        0.85,
+      )
+      URL.revokeObjectURL(img.src)
+    }
+    img.onerror = reject
+    img.src = URL.createObjectURL(file)
+  })
+}
+
+// Multi-select photo uploader with auto-crop for slideshow categories
+function CategoryPhotos({
+  label,
+  photos,
+  setPhotos,
+  photoType,
+}: {
+  label: string
+  photos: string[]
+  setPhotos: (p: string[]) => void
+  photoType: string
+}) {
+  const inputRef = useRef<HTMLInputElement>(null)
+  const [uploading, setUploading] = useState(false)
+  const filled = photos.filter(Boolean)
+
+  async function handleFiles(e: React.ChangeEvent<HTMLInputElement>) {
+    const files = Array.from(e.target.files || [])
+    if (files.length === 0) return
+    e.target.value = ''
+
+    const slotsAvailable = 3 - filled.length
+    const toProcess = files.slice(0, slotsAvailable)
+    if (toProcess.length === 0) return
+
+    setUploading(true)
+    const newUrls: string[] = []
+
+    for (const file of toProcess) {
+      try {
+        const blob = await autoCropToSquare(file)
+        const fileName = `temp_${photoType}_${Date.now()}_${Math.random().toString(36).slice(2, 6)}.jpg`
+
+        const { data, error } = await supabase.storage
+          .from('photos')
+          .upload(fileName, blob, { contentType: 'image/jpeg', upsert: true })
+
+        if (error) throw error
+
+        const { data: urlData } = supabase.storage.from('photos').getPublicUrl(data.path)
+        newUrls.push(urlData.publicUrl)
+      } catch (err) {
+        console.error('Upload failed:', err)
+      }
+    }
+
+    if (newUrls.length > 0) {
+      setPhotos([...filled, ...newUrls].slice(0, 3))
+    }
+    setUploading(false)
+  }
+
+  function removePhoto(index: number) {
+    setPhotos(filled.filter((_, i) => i !== index))
+  }
+
+  return (
+    <div>
+      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{label}</p>
+      <div className="grid grid-cols-3 gap-2">
+        {filled.map((url, i) => (
+          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-gray-300 transition-all">
+            <img src={url} alt="" className="w-full h-full object-cover" />
+            <button onClick={() => removePhoto(i)}
+              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/70">
+              ✕
+            </button>
+          </div>
+        ))}
+        {filled.length < 3 && (
+          <button onClick={() => inputRef.current?.click()} disabled={uploading}
+            className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 flex items-center justify-center transition-colors disabled:opacity-50">
+            {uploading ? (
+              <span className="text-xs text-gray-400 animate-pulse">Uploading...</span>
+            ) : (
+              <div className="text-center p-2">
+                <span className="text-2xl block mb-1">📷</span>
+                <span className="text-[10px] text-gray-400">{filled.length === 0 ? 'Add photos' : 'Add more'}</span>
+              </div>
+            )}
+          </button>
+        )}
+      </div>
+      <input ref={inputRef} type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
+    </div>
+  )
+}
 
 const PRESET_COUPONS = [
   { name: 'Coffee Run', emoji: '☕', coupon_type: 'a', asks_for_details: true, detail_prompt: "What's your order?", configurable: false, description: 'She tells you exactly what she wants — you deliver the caffeine.' },
@@ -367,7 +483,6 @@ export default function AppBuilder() {
         if (s.herName) setHerName(s.herName)
         if (s.hisName) setHisName(s.hisName)
         if (s.relationship) setRelationship(s.relationship)
-        if (s.hisEmail) setHisEmail(s.hisEmail)
         if (s.hisPhone) setHisPhone(s.hisPhone)
         if (s.theme) setTheme(s.theme)
         if (s.iconPhoto) setIconPhoto(s.iconPhoto)
@@ -383,14 +498,12 @@ export default function AppBuilder() {
   const [herName, setHerName] = useState('')
   const [hisName, setHisName] = useState('')
   const [relationship, setRelationship] = useState<'boyfriend' | 'husband'>('boyfriend')
-  const [hisEmail, setHisEmail] = useState('')
   const [hisPhone, setHisPhone] = useState('')
   const [theme, setTheme] = useState('sage')
   const [iconPhoto, setIconPhoto] = useState<string | null>(null)
   const [herPhotos, setHerPhotos] = useState<string[]>([])
   const [hisPhotos, setHisPhotos] = useState<string[]>([])
   const [couplePhotos, setCouplePhotos] = useState<string[]>([])
-  const allPhotos = [...herPhotos, ...hisPhotos, ...couplePhotos].filter(Boolean)
   const [selectedCoupons, setSelectedCoupons] = useState<any[]>([])
   const [showCustomForm, setShowCustomForm] = useState(false)
   const [customName, setCustomName] = useState('')
@@ -406,9 +519,9 @@ export default function AppBuilder() {
   const addedNames = selectedCoupons.map((c: any) => c.name)
 
   function canAdvance(): boolean {
-    if (step === 0) return herName.trim() !== '' && hisName.trim() !== '' && hisEmail.trim() !== '' && hisPhone.trim() !== ''
+    if (step === 0) return herName.trim() !== '' && hisName.trim() !== ''
     if (step === 1) return true
-    if (step === 2) return herPhotos.filter(Boolean).length >= 1 && iconPhoto !== null
+    if (step === 2) return iconPhoto !== null
     if (step === 3) return selectedCoupons.length > 0
     return true
   }
@@ -456,7 +569,7 @@ export default function AppBuilder() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          herName, hisName, relationship, hisEmail, hisPhone, theme,
+          herName, hisName, relationship, hisPhone, theme,
           iconPhotoUrl: iconPhoto,
           herPhotos, hisPhotos, couplePhotos,
           coupons: selectedCoupons.map((c: any) => ({
@@ -481,9 +594,9 @@ export default function AppBuilder() {
   }
 // Save builder state to sessionStorage so it survives Stripe redirect
   useEffect(() => {
-    const state = { herName, hisName, relationship, hisEmail, hisPhone, theme, iconPhoto, herPhotos, hisPhotos, couplePhotos, selectedCoupons, step }
+    const state = { herName, hisName, relationship, hisPhone, theme, iconPhoto, herPhotos, hisPhotos, couplePhotos, selectedCoupons, step }
     try { sessionStorage.setItem('builderState', JSON.stringify(state)) } catch (e) {}
-  }, [herName, hisName, relationship, hisEmail, hisPhone, theme, iconPhoto, herPhotos, hisPhotos, couplePhotos, selectedCoupons, step])
+  }, [herName, hisName, relationship, hisPhone, theme, iconPhoto, herPhotos, hisPhotos, couplePhotos, selectedCoupons, step])
 
   const pageBg = `bg-gradient-to-b ${t.pageBg}`
 
@@ -533,21 +646,6 @@ export default function AppBuilder() {
                 <button onClick={() => setRelationship('husband')} className={`flex-1 py-3 rounded-xl border text-sm font-medium transition-all ${relationship === 'husband' ? t.toggleOn : 'border-gray-300 text-gray-500'}`}>Husband</button>
               </div>
             </div>
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Your email</label>
-              <input type="email" value={hisEmail} onChange={(e) => setHisEmail(e.target.value)} placeholder="you@email.com"
-                className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 outline-none ${t.inputFocus} transition-colors`} />
-            </div>
-            <div>
-              <label className="block text-sm text-gray-700 mb-1">Your phone number</label>
-              <input type="tel" value={hisPhone} onChange={(e) => setHisPhone(e.target.value)} placeholder="+1 (555) 123-4567"
-                className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 outline-none ${t.inputFocus} transition-colors`} />
-              <p className="text-xs text-gray-400 mt-1">You&apos;ll get texted when she redeems a coupon.</p>
-            </div>
-            <div className="flex items-start gap-2">
-              <input type="checkbox" defaultChecked className="mt-1 rounded border-gray-300 text-emerald-500 focus:ring-emerald-400" />
-              <p className="text-xs text-gray-500">I consent to receiving automated SMS notifications when coupons are redeemed.</p>
-            </div>
           </div>
         )}
 
@@ -573,51 +671,20 @@ export default function AppBuilder() {
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-5">
             <div>
               <h2 className="text-lg font-semibold text-gray-900 mb-1">Add your photos</h2>
-              <p className="text-sm text-gray-500">Upload 9 square photos. Tap any slot to add a photo.</p>
+              <p className="text-sm text-gray-500">Start with her app icon — slideshow photos are optional.</p>
             </div>
             <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Photos of {herName || 'her'} (3)</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2].map(i => (
-                  <PhotoUploader key={`her-${i}`} photoType="her" displayOrder={i + 1}
-                    currentUrl={herPhotos[i] || null} themeAccent={t.accent}
-                    onUploaded={(url: string) => { const next = [...herPhotos]; next[i] = url; setHerPhotos(next) }} />
-                ))}
+              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">App icon (shown on her home screen)</p>
+              <div className="w-24">
+                <PhotoUploader photoType="her" displayOrder={0}
+                  currentUrl={iconPhoto} themeAccent={t.accent}
+                  onUploaded={(url: string) => setIconPhoto(url)} />
               </div>
             </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Photos of {hisName || 'you'} (3)</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2].map(i => (
-                  <PhotoUploader key={`him-${i}`} photoType="him" displayOrder={i + 1}
-                    currentUrl={hisPhotos[i] || null} themeAccent={t.accent}
-                    onUploaded={(url: string) => { const next = [...hisPhotos]; next[i] = url; setHisPhotos(next) }} />
-                ))}
-              </div>
-            </div>
-            <div>
-              <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Photos together (3)</p>
-              <div className="grid grid-cols-3 gap-2">
-                {[0, 1, 2].map(i => (
-                  <PhotoUploader key={`couple-${i}`} photoType="couple" displayOrder={i + 1}
-                    currentUrl={couplePhotos[i] || null} themeAccent={t.accent}
-                    onUploaded={(url: string) => { const next = [...couplePhotos]; next[i] = url; setCouplePhotos(next) }} />
-                ))}
-              </div>
-            </div>
-            {allPhotos.length > 0 && (
-              <div>
-                <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">Pick the app icon (shown on her home screen)</p>
-                <div className="grid grid-cols-3 gap-2">
-                  {allPhotos.map((url, i) => (
-                    <button key={i} onClick={() => setIconPhoto(url)}
-                      className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${iconPhoto === url ? `${t.selectedBorder} ring-2 ring-offset-2` : 'border-transparent hover:border-gray-300'}`}>
-                      <img src={url} alt="" className="w-full h-full object-cover" />
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
+            <CategoryPhotos label={`Photos for ${herName || 'her'} dashboard`} photos={herPhotos} setPhotos={setHerPhotos} photoType="her" />
+            <CategoryPhotos label={`Photos of ${hisName || 'you'}`} photos={hisPhotos} setPhotos={setHisPhotos} photoType="him" />
+            <CategoryPhotos label="Photos to show after she redeems" photos={couplePhotos} setPhotos={setCouplePhotos} photoType="couple" />
+            <p className="text-xs text-gray-400 text-center">You can always add, edit, and crop photos later from your dashboard.</p>
           </div>
         )}
 
@@ -729,7 +796,18 @@ export default function AppBuilder() {
             <MiniDashboardPreview herName={herName} hisName={hisName} theme={theme} herPhotos={herPhotos} coupons={selectedCoupons} />
 
             <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-4">
-              <div className="space-y-3">
+              <div>
+                <label className="block text-sm text-gray-700 mb-1">Your phone number</label>
+                <input type="tel" value={hisPhone} onChange={(e) => setHisPhone(e.target.value)} placeholder="+1 (555) 123-4567"
+                  className={`w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-900 placeholder-gray-400 outline-none ${t.inputFocus} transition-colors`} />
+                <p className="text-xs text-gray-400 mt-1">This is so we can text you when she redeems her coupons.</p>
+              </div>
+              <div className="flex items-start gap-2">
+                <input type="checkbox" defaultChecked className="mt-1 rounded border-gray-300 text-emerald-500 focus:ring-emerald-400" />
+                <p className="text-xs text-gray-500">I consent to receiving automated SMS notifications when coupons are redeemed.</p>
+              </div>
+
+              <div className="space-y-3 pt-2">
                 {[
                   { icon: '📱', text: 'Her own personalized coupon app' },
                   { icon: '🎨', text: selectedCoupons.length + ' custom coupons she can redeem anytime' },
@@ -749,7 +827,7 @@ export default function AppBuilder() {
                 <span className="text-gray-900 font-bold text-2xl">$14.99</span>
               </div>
 
-              <button onClick={handlePay} disabled={paying} className={`w-full py-4 rounded-2xl ${t.accent} ${t.accentHover} ${t.btnText} font-bold text-base transition-all active:scale-[0.97] disabled:opacity-50`}>{paying ? 'Redirecting to checkout...' : 'Pay $14.99'}</button>
+              <button onClick={handlePay} disabled={paying || !hisPhone.trim()} className={`w-full py-4 rounded-2xl ${t.accent} ${t.accentHover} ${t.btnText} font-bold text-base transition-all active:scale-[0.97] disabled:opacity-50`}>{paying ? 'Redirecting to checkout...' : 'Pay $14.99'}</button>
               <p className="text-xs text-gray-400 text-center">Secure payment powered by Stripe</p>
             </div>
           </div>

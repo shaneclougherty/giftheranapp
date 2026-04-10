@@ -20,9 +20,9 @@ export async function POST(request: NextRequest) {
 
   try {
     const body = await request.json()
-    const { herName, hisName, relationship, hisEmail, hisPhone, theme, iconPhotoUrl, herPhotos, hisPhotos, couplePhotos, coupons } = body
+    const { herName, hisName, relationship, hisPhone, theme, iconPhotoUrl, herPhotos, hisPhotos, couplePhotos, coupons } = body
 
-    if (!herName || !hisName || !hisEmail || !hisPhone || !coupons?.length) {
+    if (!herName || !hisName || !hisPhone || !coupons?.length) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -36,7 +36,7 @@ export async function POST(request: NextRequest) {
         her_name: herName,
         his_name: hisName,
         relationship_type: relationship,
-        his_email: hisEmail,
+        his_email: null,
         his_phone: hisPhone,
         theme: theme,
         her_slug: herSlug,
@@ -100,8 +100,7 @@ export async function POST(request: NextRequest) {
         quantity: 1,
       }],
       mode: 'payment',
-      customer_email: hisEmail,
-      success_url: origin + '/success?app_id=' + appId,
+      success_url: origin + '/success?app_id=' + appId + '&session_id={CHECKOUT_SESSION_ID}',
       cancel_url: origin + '/build',
       metadata: {
         app_id: appId,

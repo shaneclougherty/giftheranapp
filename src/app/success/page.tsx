@@ -9,6 +9,7 @@ export const dynamic = 'force-dynamic'
 function SuccessContent() {
   const searchParams = useSearchParams()
   const appId = searchParams.get('app_id')
+  const sessionId = searchParams.get('session_id')
   const [app, setApp] = useState<any>(null)
   const [loading, setLoading] = useState(true)
   const [copied, setCopied] = useState<string | null>(null)
@@ -20,8 +21,20 @@ function SuccessContent() {
       await new Promise(resolve => setTimeout(resolve, 1500))
       const { data } = await supabase.from('apps').select('*').eq('id', appId).single()
       if (data) {
-        await supabase.from('apps').update({ payment_status: 'paid', is_active: true }).eq('id', appId)
-        setApp(data)
+        // Activate the app
+        const updates: Record<string, any> = { payment_status: 'paid', is_active: true }
+
+        // Fetch customer email from Stripe session and write it back
+        if (sessionId) {
+          try {
+            const res = await fetch('/api/get-session-email?session_id=' + encodeURIComponent(sessionId))
+            const { email } = await res.json()
+            if (email) updates.his_email = email
+          } catch {}
+        }
+
+        await supabase.from('apps').update(updates).eq('id', appId)
+        setApp({ ...data, ...updates })
         setLoading(false)
         setTimeout(() => setFadeIn(true), 200)
       } else {
@@ -29,7 +42,7 @@ function SuccessContent() {
       }
     }
     loadApp()
-  }, [appId])
+  }, [appId, sessionId])
 
   function copyLink(link: string, label: string) {
     navigator.clipboard.writeText(link)
@@ -194,7 +207,7 @@ function SuccessContent() {
             </div>
           </div>
 
-          <p className="text-xs text-gray-400 text-center mt-4">Both links have been emailed to {app.his_email}</p>
+          {app.his_email && <p className="text-xs text-gray-400 text-center mt-4">Both links have been emailed to {app.his_email}</p>}
         </div>
 
         {/* ====== SECTION 4: Video ====== */}
