@@ -105,12 +105,12 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
     setSelectedImage(null)
   }
 
-  // Cropper modal
+  // Cropper modal — fixed overlay, fits on mobile without scrolling
   if (showCropper && selectedImage) {
     return (
-      <div className="fixed inset-0 z-50 bg-black flex flex-col">
-        {/* Crop area */}
-        <div className="flex-1 relative">
+      <div className="fixed inset-0 z-50 bg-black flex flex-col" style={{ height: '100dvh' }}>
+        {/* Crop area — ~60% of viewport */}
+        <div className="relative" style={{ height: '60dvh' }}>
           <Cropper
             image={selectedImage}
             crop={crop}
@@ -124,8 +124,8 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
           />
         </div>
 
-        {/* Zoom slider */}
-        <div className="bg-black px-8 py-3">
+        {/* Controls — zoom + buttons packed below crop area */}
+        <div className="flex-1 flex flex-col justify-center px-6 gap-3">
           <input
             type="range"
             min={1}
@@ -135,23 +135,21 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
             onChange={(e) => setZoom(Number(e.target.value))}
             className="w-full accent-white"
           />
-        </div>
-
-        {/* Actions */}
-        <div className="bg-black px-6 pb-8 pt-2 flex gap-3">
-          <button
-            onClick={handleCancel}
-            className="flex-1 py-3 rounded-xl border border-white/30 text-white font-medium text-sm"
-          >
-            Cancel
-          </button>
-          <button
-            onClick={handleCropConfirm}
-            disabled={uploading}
-            className={`flex-1 py-3 rounded-xl ${themeAccent} text-white font-medium text-sm disabled:opacity-50`}
-          >
-            {uploading ? 'Uploading...' : 'Use Photo'}
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={handleCancel}
+              className="flex-1 py-3 rounded-xl border border-white/30 text-white font-medium text-sm"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={handleCropConfirm}
+              disabled={uploading}
+              className={`flex-1 py-3 rounded-xl ${themeAccent} text-white font-medium text-sm disabled:opacity-50`}
+            >
+              {uploading ? 'Uploading...' : 'Use Photo'}
+            </button>
+          </div>
         </div>
       </div>
     )

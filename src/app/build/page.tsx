@@ -89,31 +89,39 @@ function CategoryPhotos({
 
   return (
     <div>
-      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">{label}</p>
-      <div className="grid grid-cols-3 gap-2">
-        {filled.map((url, i) => (
-          <div key={i} className="relative aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-gray-300 transition-all">
-            <img src={url} alt="" className="w-full h-full object-cover" />
-            <button onClick={() => removePhoto(i)}
-              className="absolute top-1 right-1 w-6 h-6 rounded-full bg-black/50 text-white text-xs flex items-center justify-center hover:bg-black/70">
-              ✕
-            </button>
-          </div>
-        ))}
-        {filled.length < 3 && (
-          <button onClick={() => inputRef.current?.click()} disabled={uploading}
-            className="aspect-square rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 flex items-center justify-center transition-colors disabled:opacity-50">
-            {uploading ? (
-              <span className="text-xs text-gray-400 animate-pulse">Uploading...</span>
-            ) : (
-              <div className="text-center p-2">
-                <span className="text-2xl block mb-1">📷</span>
-                <span className="text-[10px] text-gray-400">{filled.length === 0 ? 'Add photos' : 'Add more'}</span>
-              </div>
-            )}
-          </button>
-        )}
-      </div>
+      <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2 text-center">{label}</p>
+
+      {/* Thumbnails */}
+      {filled.length > 0 && (
+        <div className="flex justify-center gap-2 mb-2">
+          {filled.map((url, i) => (
+            <div key={i} className="relative w-20 h-20 rounded-xl overflow-hidden border-2 border-transparent hover:border-gray-300 transition-all">
+              <img src={url} alt="" className="w-full h-full object-cover" />
+              <button onClick={() => removePhoto(i)}
+                className="absolute top-0.5 right-0.5 w-5 h-5 rounded-full bg-black/50 text-white text-[10px] flex items-center justify-center hover:bg-black/70">
+                ✕
+              </button>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Upload button */}
+      {filled.length < 3 && (
+        <button onClick={() => inputRef.current?.click()} disabled={uploading}
+          className="w-full py-4 rounded-xl border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+          {uploading ? (
+            <span className="text-sm text-gray-400 animate-pulse">Uploading...</span>
+          ) : (
+            <>
+              <span className="text-lg">+</span>
+              <span className="text-sm text-gray-500">{filled.length === 0 ? 'Add photos' : 'Add more'}</span>
+            </>
+          )}
+        </button>
+      )}
+      <p className="text-[11px] text-gray-400 text-center mt-1">Select up to 3 photos</p>
+
       <input ref={inputRef} type="file" accept="image/*" multiple onChange={handleFiles} className="hidden" />
     </div>
   )
@@ -162,7 +170,9 @@ function Slideshow({ photos, themeObj, size = 'w-24 h-24' }: { photos: string[];
   )
   return (
     <div className={`${size} mx-auto rounded-xl border-2 ${themeObj.iconBorder} overflow-hidden mb-3 shadow relative`}>
-      
+      {filtered.map((url, i) => (
+        <img key={i} src={url} alt="" className={`absolute inset-0 w-full h-full object-cover transition-opacity duration-700 ${i === current ? 'opacity-100' : 'opacity-0'}`} />
+      ))}
     </div>
   )
 }
@@ -669,13 +679,13 @@ export default function AppBuilder() {
 
         {step === 2 && (
           <div className="bg-white rounded-2xl border border-gray-200 p-5 shadow-sm space-y-5">
-            <div>
+            <div className="text-center">
               <h2 className="text-lg font-semibold text-gray-900 mb-1">Add your photos</h2>
-              <p className="text-sm text-gray-500">Start with her app icon — slideshow photos are optional.</p>
+              <p className="text-sm text-gray-400">You can always add, edit, and crop photos later from your dashboard.</p>
             </div>
-            <div>
+            <div className="text-center">
               <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-2">App icon (shown on her home screen)</p>
-              <div className="w-24">
+              <div className="w-24 mx-auto">
                 <PhotoUploader photoType="her" displayOrder={0}
                   currentUrl={iconPhoto} themeAccent={t.accent}
                   onUploaded={(url: string) => setIconPhoto(url)} />
@@ -684,7 +694,9 @@ export default function AppBuilder() {
             <CategoryPhotos label={`Photos for ${herName || 'her'} dashboard`} photos={herPhotos} setPhotos={setHerPhotos} photoType="her" />
             <CategoryPhotos label={`Photos of ${hisName || 'you'}`} photos={hisPhotos} setPhotos={setHisPhotos} photoType="him" />
             <CategoryPhotos label="Photos to show after she redeems" photos={couplePhotos} setPhotos={setCouplePhotos} photoType="couple" />
-            <p className="text-xs text-gray-400 text-center">You can always add, edit, and crop photos later from your dashboard.</p>
+            {!iconPhoto && (
+              <p className="text-xs text-red-500 text-center font-medium">Please add an icon photo to continue</p>
+            )}
           </div>
         )}
 
