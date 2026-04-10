@@ -44,10 +44,13 @@ export async function POST(request: NextRequest) {
     const { herName, hisName, relationship, hisPhone, theme, iconPhotoUrl, herPhotos, hisPhotos, couplePhotos, coupons } = body
 
     if (!herName || !hisName || !hisPhone || !coupons?.length) {
+      console.error('Validation failed:', { herName: !!herName, hisName: !!hisName, hisPhone: !!hisPhone, couponsLength: coupons?.length })
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    console.log('Generating slug for:', herName, hisName)
     const slug = await generateHumanSlug(herName, hisName, supabase)
+    console.log('Generated slug:', slug)
     const origin = request.headers.get('origin') || 'http://localhost:3000'
 
     const { data: appData, error: appError } = await supabase
@@ -56,7 +59,7 @@ export async function POST(request: NextRequest) {
         her_name: herName,
         his_name: hisName,
         relationship_type: relationship,
-        his_email: null,
+        his_email: '',
         his_phone: hisPhone,
         theme: theme,
         her_slug: slug,
@@ -68,7 +71,11 @@ export async function POST(request: NextRequest) {
       .select()
       .single()
 
-    if (appError) throw appError
+    if (appError) {
+      console.error('Supabase insert error:', appError)
+      throw appError
+    }
+    console.log('App created with id:', appData.id)
 
     const appId = appData.id
 
@@ -84,7 +91,8 @@ export async function POST(request: NextRequest) {
     })
 
     if (photoRecords.length > 0) {
-      await supabase.from('photos').insert(photoRecords)
+      const { error: photoError } = await supabase.from('photos').insert(photoRecords)
+      if (photoError) console.error('Photo insert error:', photoError)
     }
 
     const couponRecords = coupons.map((c: any, i: number) => ({
@@ -103,9 +111,11 @@ export async function POST(request: NextRequest) {
     }))
 
     if (couponRecords.length > 0) {
-      await supabase.from('coupons').insert(couponRecords)
+      const { error: couponError } = await supabase.from('coupons').insert(couponRecords)
+      if (couponError) console.error('Coupon insert error:', couponError)
     }
 
+    console.log('Creating Stripe session...')
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ['card'],
       line_items: [{
