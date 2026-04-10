@@ -74,9 +74,11 @@ function SuccessContent() {
     )
   }
 
-  const herGiftLink = (typeof window !== 'undefined' ? window.location.origin : '') + '/gift/' + app.her_slug
-  const herAppLink = (typeof window !== 'undefined' ? window.location.origin : '') + '/app/' + app.her_slug
-  const hisLink = (typeof window !== 'undefined' ? window.location.origin : '') + '/manage/' + app.his_slug
+  const origin = typeof window !== 'undefined' ? window.location.origin : ''
+  const slug = app.her_slug
+  const giftLink = origin + '/gift/' + slug
+  const appLink = origin + '/app/' + slug
+  const manageLink = origin + '/manage/' + slug
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-emerald-50 to-white pb-12">
@@ -93,7 +95,24 @@ function SuccessContent() {
           </p>
         </div>
 
-        {/* ====== SECTION 1: Get her app on her phone ====== */}
+        {/* ====== SECTION 1: See it for yourself ====== */}
+        <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
+          <div className="px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center gap-3">
+              <span className="text-2xl">👀</span>
+              <h2 className="text-lg font-bold text-gray-900">See it for yourself</h2>
+            </div>
+          </div>
+          <div className="px-5 py-4">
+            <p className="text-xs text-gray-500 mb-3">Take a look at what you built before you send it to {app.her_name}.</p>
+            <a href={appLink} target="_blank" rel="noopener noreferrer"
+              className="block w-full text-center py-3 bg-emerald-500 text-white rounded-xl font-medium text-sm hover:bg-emerald-600 transition-colors">
+              Open {app.her_name}&apos;s App
+            </a>
+          </div>
+        </div>
+
+        {/* ====== SECTION 2: Get her app on her phone ====== */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
@@ -101,41 +120,16 @@ function SuccessContent() {
               <h2 className="text-lg font-bold text-gray-900">Get her app on her phone</h2>
             </div>
           </div>
-
-          {/* Option A */}
-          <div className="px-5 py-4 border-b border-gray-100">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">Option A: Set it up yourself</h3>
-            <p className="text-xs text-gray-500 mb-3">Grab her phone when she&apos;s not looking — maximum surprise factor.</p>
-
-            <div className="flex gap-2 mb-4">
-              <input type="text" readOnly value={herAppLink}
-                className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 outline-none" />
-              <button onClick={() => copyLink(herAppLink, 'herApp')}
-                className="px-3 py-2 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors">
-                {copied === 'herApp' ? 'Copied!' : 'Copy'}
-              </button>
-            </div>
-
-            <p className="text-xs text-gray-500 mb-3">Open the link on her phone, then:</p>
-            <div className="space-y-2">
-              <p className="text-sm text-gray-800"><span className="font-semibold">Step 1:</span> Tap Share</p>
-              <p className="text-sm text-gray-800"><span className="font-semibold">Step 2:</span> Tap &ldquo;Add to Home Screen&rdquo;</p>
-              <p className="text-sm text-gray-800"><span className="font-semibold">Step 3:</span> Find your app on the home screen and open it!</p>
-            </div>
-          </div>
-
-          {/* Option B */}
           <div className="px-5 py-4">
-            <h3 className="text-sm font-semibold text-gray-900 mb-1">Option B: Send her the gift</h3>
             <p className="text-xs text-gray-500 mb-3">She&apos;ll get a gift reveal animation with setup instructions built in.</p>
             <div className="flex gap-2">
-              <input type="text" readOnly value={herGiftLink}
+              <input type="text" readOnly value={giftLink}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 outline-none" />
               <button onClick={() => {
                 if (navigator.share) {
-                  navigator.share({ title: 'A gift from ' + app.his_name, text: app.his_name + ' made you something special! 🎁', url: herGiftLink })
+                  navigator.share({ title: 'A gift from ' + app.his_name, text: app.his_name + ' made you something special!', url: giftLink })
                 } else {
-                  copyLink(herGiftLink, 'herGift')
+                  copyLink(giftLink, 'herGift')
                 }
               }}
                 className="px-4 py-2 bg-emerald-500 text-white rounded-lg text-xs font-medium hover:bg-emerald-600 transition-colors">
@@ -145,7 +139,7 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* ====== SECTION 2: Get your dashboard on your phone ====== */}
+        {/* ====== SECTION 3: Get your dashboard on your phone ====== */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
@@ -157,9 +151,9 @@ function SuccessContent() {
 
           <div className="px-5 py-4">
             <div className="flex gap-2 mb-4">
-              <input type="text" readOnly value={hisLink}
+              <input type="text" readOnly value={manageLink}
                 className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 outline-none" />
-              <a href={hisLink} target="_blank" rel="noopener noreferrer"
+              <a href={manageLink} target="_blank" rel="noopener noreferrer"
                 className="px-4 py-2 bg-gray-800 text-white rounded-lg text-xs font-medium hover:bg-gray-900 transition-colors">
                 Open
               </a>
@@ -174,7 +168,7 @@ function SuccessContent() {
           </div>
         </div>
 
-        {/* ====== SECTION 3: Save these links ====== */}
+        {/* ====== SECTION 4: Save these links ====== */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 p-5">
           <div className="flex items-center gap-3 mb-3">
             <span className="text-2xl">🔗</span>
@@ -186,9 +180,9 @@ function SuccessContent() {
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">{app.her_name}&apos;s app</p>
               <div className="flex gap-2">
-                <input type="text" readOnly value={herAppLink}
+                <input type="text" readOnly value={appLink}
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 outline-none" />
-                <button onClick={() => copyLink(herAppLink, 'saveHer')}
+                <button onClick={() => copyLink(appLink, 'saveHer')}
                   className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition-colors">
                   {copied === 'saveHer' ? 'Copied!' : 'Copy'}
                 </button>
@@ -197,9 +191,9 @@ function SuccessContent() {
             <div>
               <p className="text-xs font-medium text-gray-700 mb-1">Your dashboard</p>
               <div className="flex gap-2">
-                <input type="text" readOnly value={hisLink}
+                <input type="text" readOnly value={manageLink}
                   className="flex-1 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-600 outline-none" />
-                <button onClick={() => copyLink(hisLink, 'saveHis')}
+                <button onClick={() => copyLink(manageLink, 'saveHis')}
                   className="px-3 py-2 bg-gray-200 text-gray-700 rounded-lg text-xs font-medium hover:bg-gray-300 transition-colors">
                   {copied === 'saveHis' ? 'Copied!' : 'Copy'}
                 </button>

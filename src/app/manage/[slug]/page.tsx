@@ -195,7 +195,7 @@ export default function ManageDashboard() {
   function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
 
   async function loadData() {
-    const { data: appData, error: appError } = await supabase.from('apps').select('*').eq('his_slug', slug).single()
+    const { data: appData, error: appError } = await supabase.from('apps').select('*').or(`her_slug.eq.${slug},his_slug.eq.${slug}`).single()
     if (appError || !appData) { setError(true); setLoading(false); return }
     setApp(appData)
     const { data: couponData } = await supabase.from('coupons').select('*').eq('app_id', appData.id).order('display_order', { ascending: true })

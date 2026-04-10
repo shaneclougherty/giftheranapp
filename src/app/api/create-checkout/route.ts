@@ -2,13 +2,34 @@ import { NextRequest, NextResponse } from 'next/server'
 import Stripe from 'stripe'
 import { createClient } from '@supabase/supabase-js'
 
-function generateSlug(): string {
-  const chars = 'abcdefghijklmnopqrstuvwxyz0123456789'
-  let result = ''
-  for (let i = 0; i < 12; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length))
+async function generateHumanSlug(herName: string, hisName: string, supabase: any): Promise<string> {
+  let base = (herName + hisName).toLowerCase().replace(/[^a-z0-9]/g, '')
+  if (!base) base = 'app'
+
+  for (let attempt = 0; attempt < 5; attempt++) {
+    const { data: existing } = await supabase
+      .from('apps')
+      .select('her_slug')
+      .like('her_slug', base + '%')
+
+    let maxNum = 0
+    if (existing) {
+      for (const row of existing) {
+        const suffix = row.her_slug.slice(base.length)
+        const num = parseInt(suffix, 10)
+        if (!isNaN(num) && num > maxNum) maxNum = num
+      }
+    }
+
+    const slug = base + (maxNum + 1)
+
+    // Check it doesn't already exist (race condition guard)
+    const { data: taken } = await supabase.from('apps').select('id').eq('her_slug', slug).single()
+    if (!taken) return slug
   }
-  return result
+
+  // Fallback: append timestamp to guarantee uniqueness
+  return base + Date.now().toString(36)
 }
 
 export async function POST(request: NextRequest) {
@@ -26,8 +47,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const herSlug = generateSlug()
-    const hisSlug = generateSlug()
+    const slug = await generateHumanSlug(herName, hisName, supabase)
     const origin = request.headers.get('origin') || 'http://localhost:3000'
 
     const { data: appData, error: appError } = await supabase
@@ -39,8 +59,8 @@ export async function POST(request: NextRequest) {
         his_email: null,
         his_phone: hisPhone,
         theme: theme,
-        her_slug: herSlug,
-        his_slug: hisSlug,
+        her_slug: slug,
+        his_slug: slug,
         icon_photo_url: iconPhotoUrl || null,
         payment_status: 'pending',
         is_active: false,
