@@ -181,6 +181,14 @@ export default function GirlfriendDashboard() {
   const [sectionVisible, setSectionVisible] = useState(false)
 
   useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'manifest'
+    link.href = '/api/manifest/' + slug
+    document.head.appendChild(link)
+    return () => { document.head.removeChild(link) }
+  }, [slug])
+
+  useEffect(() => {
     async function loadApp() {
       const { data: appData, error: appError } = await supabase
         .from('apps')

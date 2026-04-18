@@ -219,6 +219,14 @@ export default function ManageDashboard() {
 
   useEffect(() => { loadData() }, [slug])
 
+  useEffect(() => {
+    const link = document.createElement('link')
+    link.rel = 'manifest'
+    link.href = '/api/manage-manifest/' + slug
+    document.head.appendChild(link)
+    return () => { document.head.removeChild(link) }
+  }, [slug])
+
   const couponCount = coupons.length
   const atMax = couponCount >= 5
   const addedNames = coupons.map(c => c.name)
