@@ -135,21 +135,28 @@ export default function GiftRevealPage() {
               You got your own app! 🎉
             </h2>
             <p className="text-sm text-gray-500">
-              Follow steps below for THIS PAGE to add your new app to your home screen
+              Follow these steps to get your app on your home screen
             </p>
           </div>
 
-          {/* 3 simple steps */}
+          {/* 4 simple steps */}
           <div className="bg-white rounded-2xl border border-gray-200 shadow-sm p-5 mb-6">
             <div className="space-y-4">
               <p className="text-sm text-gray-800">
-                <span className="font-bold">Step 1:</span> Tap Share
+                <span className="font-bold">Step 1:</span> Tap &ldquo;Open&rdquo; to see your app
+              </p>
+              <a href={'/app/' + slug}
+                className="block w-full text-center py-3 bg-pink-500 text-white rounded-xl font-bold text-base hover:bg-pink-600 active:scale-[0.97] transition-all">
+                Open My App
+              </a>
+              <p className="text-sm text-gray-800">
+                <span className="font-bold">Step 2:</span> Tap Share
               </p>
               <p className="text-sm text-gray-800">
-                <span className="font-bold">Step 2: </span> Tap &ldquo;Add to Home Screen&rdquo;
+                <span className="font-bold">Step 3:</span> Tap &ldquo;Add to Home Screen&rdquo;
               </p>
               <p className="text-sm text-gray-800">
-                <span className="font-bold">Step 3:</span> Find and open your app!
+                <span className="font-bold">Step 4:</span> Find and open your app!
               </p>
             </div>
           </div>
