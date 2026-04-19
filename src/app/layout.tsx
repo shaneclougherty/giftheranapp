@@ -15,6 +15,9 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "GiftHerAnApp",
   description: "The most thoughtful gift you'll ever give her — build her her own personalized coupon app in 5 minutes.",
+  icons: {
+    icon: 'https://kckxnvyorzzayhfapadc.supabase.co/storage/v1/object/public/photos/GiftHerAnApp_Logo_small.png',
+  },
 };
 
 export default function RootLayout({

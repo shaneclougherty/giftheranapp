@@ -164,7 +164,7 @@ export default function LandingPage() {
           <div className="mt-16 md:mt-0 flex justify-center">
             <AnimateIn type="phone">
               <img
-                src="/Iphone_w_Dasboard.png"
+                src="https://kckxnvyorzzayhfapadc.supabase.co/storage/v1/object/public/photos/Iphone_w_Dasboard.png"
                 alt="Her personalized coupon app"
                 className="w-full max-w-md md:max-w-lg lg:max-w-xl drop-shadow-2xl"
               />
