@@ -183,7 +183,7 @@ export default function GirlfriendDashboard() {
   useEffect(() => {
     const link = document.createElement('link')
     link.rel = 'manifest'
-    link.href = '/api/manifest/' + slug
+    link.href = '/app/' + slug + '/manifest.json'
     document.head.appendChild(link)
     return () => { document.head.removeChild(link) }
   }, [slug])

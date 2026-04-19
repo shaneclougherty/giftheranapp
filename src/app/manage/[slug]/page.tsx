@@ -222,7 +222,7 @@ export default function ManageDashboard() {
   useEffect(() => {
     const link = document.createElement('link')
     link.rel = 'manifest'
-    link.href = '/api/manage-manifest/' + slug
+    link.href = '/manage/' + slug + '/manifest.json'
     document.head.appendChild(link)
     return () => { document.head.removeChild(link) }
   }, [slug])
