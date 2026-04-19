@@ -204,7 +204,7 @@ function SuccessContent() {
           {app.his_email && <p className="text-xs text-gray-400 text-center mt-4">Both links have been emailed to {app.his_email}</p>}
         </div>
 
-        {/* ====== SECTION 4: Video ====== */}
+        {/* ====== SECTION 5: Video ====== */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm mb-5 overflow-hidden">
           <div className="px-5 py-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
@@ -212,13 +212,8 @@ function SuccessContent() {
               <h2 className="text-lg font-bold text-gray-900">Need help? Watch this</h2>
             </div>
           </div>
-          <div className="px-5 py-6 flex justify-center">
-            <div className="w-[200px] aspect-[9/16] bg-gray-100 rounded-2xl flex items-center justify-center border-2 border-dashed border-gray-300">
-              <div className="text-center">
-                <span className="text-4xl">▶️</span>
-                <p className="text-xs text-gray-400 mt-2 px-4">15-second setup video coming soon</p>
-              </div>
-            </div>
+          <div className="p-4">
+            <video src="/managerinstructionvideo.mp4" controls playsInline webkit-playsinline preload="metadata" className="w-full rounded-2xl" />
           </div>
         </div>
 
