@@ -213,7 +213,7 @@ function SuccessContent() {
             </div>
           </div>
           <div className="p-4">
-            <video src="/managerinstructionvideo.mp4" controls playsInline webkit-playsinline preload="metadata" className="w-full rounded-2xl" />
+            <video src="https://kckxnvyorzzayhfapadc.supabase.co/storage/v1/object/public/photos/managerinstructionvideo.mp4" controls playsInline webkit-playsinline preload="metadata" className="w-full rounded-2xl" />
           </div>
         </div>
 

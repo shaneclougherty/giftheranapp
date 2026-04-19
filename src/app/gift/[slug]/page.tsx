@@ -167,7 +167,7 @@ export default function GiftRevealPage() {
               <p className="text-sm font-semibold text-gray-900">Need help? Watch this</p>
             </div>
             <div className="p-4">
-              <video src="/appinstructionvideo.mp4" controls playsInline webkit-playsinline preload="metadata" className="w-full rounded-2xl" />
+              <video src="https://kckxnvyorzzayhfapadc.supabase.co/storage/v1/object/public/photos/appinstructionvideo.mp4" controls playsInline webkit-playsinline preload="metadata" className="w-full rounded-2xl" />
             </div>
           </div>
 
