@@ -154,7 +154,7 @@ function CouponButton({
       }`}
     >
       <span className="text-2xl mr-2">{coupon.emoji}</span>
-      <span className={`font-semibold text-base ${isRedeemed ? 'line-through opacity-60' : theme.text}`}>
+      <span className={`font-semibold text-base ${isRedeemed ? 'line-through opacity-60 text-gray-500' : theme.text}`}>
         {coupon.name}
       </span>
       {isRedeemed && (

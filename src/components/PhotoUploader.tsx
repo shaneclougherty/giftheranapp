@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useRef } from 'react'
 import Cropper from 'react-easy-crop'
 import { supabase } from '@/lib/supabase'
 
@@ -10,6 +10,7 @@ interface PhotoUploaderProps {
   displayOrder: number
   currentUrl?: string | null
   onUploaded: (url: string) => void
+  onDelete?: () => void
   themeAccent?: string
 }
 
@@ -42,13 +43,15 @@ async function getCroppedImg(imageSrc: string, crop: { x: number; y: number; wid
   })
 }
 
-export default function PhotoUploader({ appId, photoType, displayOrder, currentUrl, onUploaded, themeAccent = 'bg-emerald-400' }: PhotoUploaderProps) {
+export default function PhotoUploader({ appId, photoType, displayOrder, currentUrl, onUploaded, onDelete, themeAccent = 'bg-emerald-400' }: PhotoUploaderProps) {
   const [selectedImage, setSelectedImage] = useState<string | null>(null)
   const [crop, setCrop] = useState({ x: 0, y: 0 })
   const [zoom, setZoom] = useState(1)
   const [croppedArea, setCroppedArea] = useState<any>(null)
   const [uploading, setUploading] = useState(false)
   const [showCropper, setShowCropper] = useState(false)
+  const [showOverlay, setShowOverlay] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
     setCroppedArea(croppedAreaPixels)
@@ -62,6 +65,7 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
     reader.onload = () => {
       setSelectedImage(reader.result as string)
       setShowCropper(true)
+      setShowOverlay(false)
       setCrop({ x: 0, y: 0 })
       setZoom(1)
     }
@@ -103,6 +107,20 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
   function handleCancel() {
     setShowCropper(false)
     setSelectedImage(null)
+  }
+
+  function handleExistingPhotoTap() {
+    setShowOverlay(true)
+  }
+
+  function handleReupload() {
+    setShowOverlay(false)
+    fileInputRef.current?.click()
+  }
+
+  function handleDeletePhoto() {
+    setShowOverlay(false)
+    if (onDelete) onDelete()
   }
 
   // Cropper modal — fixed overlay, fits on mobile without scrolling
@@ -155,28 +173,64 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
     )
   }
 
-  // Photo slot
+  // Hidden file input (used by both empty slot and re-upload)
+  const fileInput = (
+    <input
+      ref={fileInputRef}
+      type="file"
+      accept="image/*"
+      onChange={handleFileSelect}
+      className="hidden"
+    />
+  )
+
+  // Photo slot — existing photo with tap overlay
+  if (currentUrl) {
+    return (
+      <div className="relative">
+        {fileInput}
+        <div
+          onClick={handleExistingPhotoTap}
+          className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-gray-300 cursor-pointer flex items-center justify-center"
+        >
+          <img src={currentUrl} alt="" className="w-full h-full object-cover" />
+        </div>
+
+        {/* Overlay with Re-upload & Delete */}
+        {showOverlay && (
+          <>
+            <div className="fixed inset-0 z-40" onClick={() => setShowOverlay(false)} />
+            <div className="absolute inset-0 z-50 bg-black/70 rounded-xl flex flex-col items-center justify-center gap-2 p-2">
+              <button
+                onClick={handleReupload}
+                className="w-full py-2 rounded-lg bg-white text-gray-900 font-medium text-xs hover:bg-gray-100 transition-colors"
+              >
+                Re-upload
+              </button>
+              {onDelete && (
+                <button
+                  onClick={handleDeletePhoto}
+                  className="w-full py-2 rounded-lg bg-red-500 text-white font-medium text-xs hover:bg-red-600 transition-colors"
+                >
+                  Delete
+                </button>
+              )}
+            </div>
+          </>
+        )}
+      </div>
+    )
+  }
+
+  // Empty slot — file picker
   return (
     <label className="block cursor-pointer">
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileSelect}
-        className="hidden"
-      />
-      <div className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
-        currentUrl
-          ? 'border-transparent hover:border-gray-300'
-          : 'border-dashed border-gray-300 hover:border-gray-400 bg-gray-50'
-      } flex items-center justify-center`}>
-        {currentUrl ? (
-          <img src={currentUrl} alt="" className="w-full h-full object-cover" />
-        ) : (
-          <div className="text-center p-2">
-            <span className="text-2xl block mb-1">📷</span>
-            <span className="text-[10px] text-gray-400">Tap to add</span>
-          </div>
-        )}
+      {fileInput}
+      <div className="aspect-square rounded-xl overflow-hidden border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 flex items-center justify-center">
+        <div className="text-center p-2">
+          <span className="text-2xl block mb-1">📷</span>
+          <span className="text-[10px] text-gray-400">Tap to add</span>
+        </div>
       </div>
     </label>
   )

@@ -317,6 +317,28 @@ export default function ManageDashboard() {
     loadData()
   }
 
+  async function handlePhotoDeleted(type: string, index: number) {
+    const photo = type === 'her' ? herPhotos[index] : type === 'him' ? hisPhotos[index] : couplePhotos[index]
+    if (!photo) return
+
+    // Delete from storage — extract file name from URL
+    const urlParts = photo.photo_url.split('/')
+    const fileName = urlParts[urlParts.length - 1]
+    await supabase.storage.from('photos').remove([fileName])
+
+    // Delete from database
+    await supabase.from('photos').delete().eq('id', photo.id)
+
+    // If this was the app icon, clear it
+    if (app.icon_photo_url === photo.photo_url) {
+      await supabase.from('apps').update({ icon_photo_url: null }).eq('id', app.id)
+      setApp({ ...app, icon_photo_url: null })
+    }
+
+    showToast('Photo deleted')
+    loadData()
+  }
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-slate-900">
@@ -546,7 +568,7 @@ export default function ManageDashboard() {
           <div className="px-4 py-4 space-y-4">
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-                Photos of {app.her_name} (3)
+                Photos for {app.her_name}&apos;s dashboard
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[0, 1, 2].map((i) => (
@@ -558,13 +580,14 @@ export default function ManageDashboard() {
                     currentUrl={herPhotos[i]?.photo_url || null}
                     themeAccent="bg-blue-500"
                     onUploaded={(url: string) => handlePhotoUploaded('her', i, url)}
+                    onDelete={() => handlePhotoDeleted('her', i)}
                   />
                 ))}
               </div>
             </div>
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-                Photos of {app.his_name} (3)
+                Photos of {app.his_name}
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[0, 1, 2].map((i) => (
@@ -576,13 +599,14 @@ export default function ManageDashboard() {
                     currentUrl={hisPhotos[i]?.photo_url || null}
                     themeAccent="bg-blue-500"
                     onUploaded={(url: string) => handlePhotoUploaded('him', i, url)}
+                    onDelete={() => handlePhotoDeleted('him', i)}
                   />
                 ))}
               </div>
             </div>
             <div>
               <p className="text-xs font-medium text-slate-500 uppercase tracking-wide mb-2">
-                Photos together (3)
+                Photos to show after she redeems
               </p>
               <div className="grid grid-cols-3 gap-2">
                 {[0, 1, 2].map((i) => (
@@ -594,6 +618,7 @@ export default function ManageDashboard() {
                     currentUrl={couplePhotos[i]?.photo_url || null}
                     themeAccent="bg-blue-500"
                     onUploaded={(url: string) => handlePhotoUploaded('couple', i, url)}
+                    onDelete={() => handlePhotoDeleted('couple', i)}
                   />
                 ))}
               </div>
