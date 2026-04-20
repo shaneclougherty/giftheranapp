@@ -166,7 +166,7 @@ export default function LandingPage() {
               <img
                 src="https://kckxnvyorzzayhfapadc.supabase.co/storage/v1/object/public/photos/Iphone_w_Dashboardv2.png"
                 alt="Her personalized coupon app"
-                className="w-full max-w-md md:max-w-lg lg:max-w-xl drop-shadow-2xl"
+                className="w-full max-w-sm md:max-w-md drop-shadow-2xl"
               />
             </AnimateIn>
           </div>
