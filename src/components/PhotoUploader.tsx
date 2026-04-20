@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useCallback, useRef } from 'react'
+import { useState, useCallback } from 'react'
 import Cropper from 'react-easy-crop'
 import { supabase } from '@/lib/supabase'
 
@@ -51,7 +51,7 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
   const [uploading, setUploading] = useState(false)
   const [showCropper, setShowCropper] = useState(false)
   const [showOverlay, setShowOverlay] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+
 
   const onCropComplete = useCallback((_: any, croppedAreaPixels: any) => {
     setCroppedArea(croppedAreaPixels)
@@ -97,9 +97,13 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
       onUploaded(urlData.publicUrl)
       setShowCropper(false)
       setSelectedImage(null)
-    } catch (err) {
+    } catch (err: any) {
       console.error('Upload failed:', err)
-      alert('Upload failed. Please try again.')
+      if (err?.message?.includes('tainted') || err?.name === 'SecurityError') {
+        alert('Could not crop this photo. Try deleting and re-uploading.')
+      } else {
+        alert('Upload failed. Please try again.')
+      }
     }
     setUploading(false)
   }
@@ -113,9 +117,13 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
     setShowOverlay(true)
   }
 
-  function handleReupload() {
+  function handleCropExisting() {
+    if (!currentUrl) return
+    setSelectedImage(currentUrl)
+    setShowCropper(true)
     setShowOverlay(false)
-    fileInputRef.current?.click()
+    setCrop({ x: 0, y: 0 })
+    setZoom(1)
   }
 
   function handleDeletePhoto() {
@@ -173,22 +181,10 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
     )
   }
 
-  // Hidden file input (used by both empty slot and re-upload)
-  const fileInput = (
-    <input
-      ref={fileInputRef}
-      type="file"
-      accept="image/*"
-      onChange={handleFileSelect}
-      className="hidden"
-    />
-  )
-
   // Photo slot — existing photo with tap overlay
   if (currentUrl) {
     return (
       <div className="relative">
-        {fileInput}
         <div
           onClick={handleExistingPhotoTap}
           className="aspect-square rounded-xl overflow-hidden border-2 border-transparent hover:border-gray-300 cursor-pointer flex items-center justify-center"
@@ -202,10 +198,10 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
             <div className="fixed inset-0 z-40" onClick={() => setShowOverlay(false)} />
             <div className="absolute inset-0 z-50 bg-black/70 rounded-xl flex flex-col items-center justify-center gap-2 p-2">
               <button
-                onClick={handleReupload}
+                onClick={handleCropExisting}
                 className="w-full py-2 rounded-lg bg-white text-gray-900 font-medium text-xs hover:bg-gray-100 transition-colors"
               >
-                Re-upload
+                Crop
               </button>
               {onDelete && (
                 <button
@@ -225,7 +221,7 @@ export default function PhotoUploader({ appId, photoType, displayOrder, currentU
   // Empty slot — file picker
   return (
     <label className="block cursor-pointer">
-      {fileInput}
+      <input type="file" accept="image/*" onChange={handleFileSelect} className="hidden" />
       <div className="aspect-square rounded-xl overflow-hidden border-2 border-dashed border-gray-300 hover:border-gray-400 bg-gray-50 flex items-center justify-center">
         <div className="text-center p-2">
           <span className="text-2xl block mb-1">📷</span>
