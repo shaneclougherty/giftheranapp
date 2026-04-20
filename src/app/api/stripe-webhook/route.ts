@@ -72,6 +72,7 @@ export async function POST(request: NextRequest) {
 
       const slug = app.her_slug
       const giftLink = 'https://www.giftheranapp.com/gift/' + slug
+      const appLink = 'https://www.giftheranapp.com/app/' + slug
       const manageLink = 'https://www.giftheranapp.com/manage/' + slug
 
       await resend.emails.send({
@@ -79,7 +80,7 @@ export async function POST(request: NextRequest) {
         replyTo: 'shaneventuresllc@gmail.com',
         to: email,
         subject: `Your gift for ${app.her_name} is ready! 🎁`,
-        html: buildEmailHtml(app.her_name, app.his_name, giftLink, manageLink),
+        html: buildEmailHtml(app.her_name, giftLink, appLink, manageLink),
       })
 
       console.log('Confirmation email sent to:', email)
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ received: true })
 }
 
-function buildEmailHtml(herName: string, hisName: string, giftLink: string, manageLink: string): string {
+function buildEmailHtml(herName: string, giftLink: string, appLink: string, manageLink: string): string {
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -114,17 +115,27 @@ function buildEmailHtml(herName: string, hisName: string, giftLink: string, mana
         <p style="margin:0;font-size:15px;color:#555;line-height:1.5;">Nice work — ${herName}'s app is built and ready to go. Here's everything you need.</p>
       </div>
 
-      <!-- Section 1: Gift link -->
+      <!-- Section 1: Send her the gift -->
       <div style="padding:0 24px 24px;">
         <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
           <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Send her the gift</p>
-          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">Share this link with ${herName} when you're ready to give her the gift:</p>
-          <a href="${giftLink}" style="display:block;text-align:center;padding:12px 20px;background:#5DD3C2;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;">Send Gift to ${herName}</a>
-          <p style="margin:10px 0 0;font-size:11px;color:#999;text-align:center;word-break:break-all;">${giftLink}</p>
+          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">When you're ready, text her this link:</p>
+          <p style="margin:0;padding:10px 14px;background:#ffffff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#0F2E2C;word-break:break-all;"><a href="${giftLink}" style="color:#0F2E2C;text-decoration:none;">${giftLink}</a></p>
+          <p style="margin:10px 0 0;font-size:11px;color:#999;">This shows her a special gift reveal before she sets up her app.</p>
         </div>
       </div>
 
-      <!-- Section 2: Manager link -->
+      <!-- Section 2: Her app link -->
+      <div style="padding:0 24px 24px;">
+        <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Her app link</p>
+          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">If she ever needs to re-access her app directly:</p>
+          <p style="margin:0;padding:10px 14px;background:#ffffff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#0F2E2C;word-break:break-all;"><a href="${appLink}" style="color:#0F2E2C;text-decoration:none;">${appLink}</a></p>
+          <p style="margin:10px 0 0;font-size:11px;color:#999;">Save this in case she gets a new phone or needs to re-add the app.</p>
+        </div>
+      </div>
+
+      <!-- Section 3: Manager dashboard -->
       <div style="padding:0 24px 24px;">
         <div style="background:#f8f8f8;border-radius:12px;padding:20px;">
           <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Your manager dashboard</p>
@@ -134,7 +145,23 @@ function buildEmailHtml(herName: string, hisName: string, giftLink: string, mana
         </div>
       </div>
 
-      <!-- Section 3: Tips -->
+      <!-- Section 4: Add to home screen -->
+      <div style="padding:0 24px 24px;">
+        <div style="background:#f8f8f8;border-radius:12px;padding:20px;">
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Add to home screen</p>
+          <p style="margin:0;font-size:13px;color:#555;line-height:1.4;">Both your dashboard and her app can be added to the home screen for easy access. Just open the link, tap Share, then tap "Add to Home Screen."</p>
+        </div>
+      </div>
+
+      <!-- Section 5: What she'll see -->
+      <div style="padding:0 24px 24px;">
+        <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
+          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">What she'll see</p>
+          <p style="margin:0;font-size:13px;color:#555;line-height:1.4;">When she opens the gift link, she'll see a gift animation, then instructions to add her app to her home screen. It takes about 30 seconds.</p>
+        </div>
+      </div>
+
+      <!-- Section 6: Quick tips -->
       <div style="padding:0 24px 28px;">
         <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#0F2E2C;">Quick tips</p>
         <ul style="margin:0;padding:0 0 0 18px;font-size:13px;color:#555;line-height:1.8;">
