@@ -244,7 +244,7 @@ export default function BragPage() {
           <p className="text-xs text-gray-400 mb-4">
             The most unique and thoughtful gift he could get you.
           </p>
-          <a href="/build"
+          <a href="/"
             className={`block w-full py-4 rounded-2xl ${t.accent} ${t.accentText} font-bold text-base transition-all active:scale-[0.97] hover:shadow-lg text-center`}>
             Get My Own App →
           </a>

@@ -221,40 +221,43 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* ── TikTok Reactions ── */}
+      {/* ── How it works ── */}
       <section className="px-6 py-24 md:py-32">
         <div className="max-w-5xl mx-auto">
           <AnimateIn>
-            <div className="text-center mb-12">
+            <div className="text-center mb-16 md:mb-20">
               <h2 className="text-4xl md:text-6xl font-bold mb-4 text-[#0F2E2C] tracking-tight">
-                Watch her open it.
+                How it works.
               </h2>
               <p className="text-lg md:text-xl text-[#5A7270]">
-                Real reactions from real girlfriends.
+                Three steps. Five minutes.
               </p>
             </div>
           </AnimateIn>
 
-          <AnimateIn delay={150}>
-            <div className="flex justify-center">
-              <div className="w-full max-w-xs aspect-[9/16] bg-gradient-to-br from-[#F0FCFA] to-[#D8F0EC] rounded-3xl border border-[#D8F0EC] flex items-center justify-center">
-                <div className="text-center px-4">
-                  <div className="w-16 h-16 mx-auto rounded-full bg-white shadow-lg flex items-center justify-center mb-3">
-                    <svg
-                      className="w-6 h-6 text-[#5DD3C2] ml-1"
-                      fill="currentColor"
-                      viewBox="0 0 24 24"
-                    >
-                      <path d="M8 5v14l11-7z" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-[#5A7270] font-medium">
-                    Reaction video coming soon
-                  </p>
-                </div>
+          <div className="grid md:grid-cols-3 gap-12 md:gap-8">
+            <AnimateIn>
+              <div className="text-center">
+                <div className="text-7xl md:text-8xl font-extrabold text-[#5DD3C2] mb-3">1</div>
+                <h3 className="text-xl md:text-2xl font-bold text-[#0F2E2C] mb-2">Build it</h3>
+                <p className="text-base md:text-lg text-[#5A7270]">Pick a theme, add your photos, choose her coupons.</p>
               </div>
-            </div>
-          </AnimateIn>
+            </AnimateIn>
+            <AnimateIn delay={150}>
+              <div className="text-center">
+                <div className="text-7xl md:text-8xl font-extrabold text-[#5DD3C2] mb-3">2</div>
+                <h3 className="text-xl md:text-2xl font-bold text-[#0F2E2C] mb-2">Give her the gift</h3>
+                <p className="text-base md:text-lg text-[#5A7270]">She opens it, sees a gift reveal, and adds her app to her home screen.</p>
+              </div>
+            </AnimateIn>
+            <AnimateIn delay={300}>
+              <div className="text-center">
+                <div className="text-7xl md:text-8xl font-extrabold text-[#5DD3C2] mb-3">3</div>
+                <h3 className="text-xl md:text-2xl font-bold text-[#0F2E2C] mb-2">She redeems, you deliver.</h3>
+                <p className="text-base md:text-lg text-[#5A7270]">She taps a coupon. You get a text with exactly what she wants.</p>
+              </div>
+            </AnimateIn>
+          </div>
         </div>
       </section>
 
@@ -395,16 +398,16 @@ export default function LandingPage() {
             className="h-16 w-auto"
           />
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-sm text-[#7A8A88]">
-            <a href="#" className="hover:text-[#0F2E2C] transition-colors">
+            <a href="/terms" className="hover:text-[#0F2E2C] transition-colors">
               Terms
             </a>
-            <a href="#" className="hover:text-[#0F2E2C] transition-colors">
+            <a href="/privacy" className="hover:text-[#0F2E2C] transition-colors">
               Privacy
             </a>
-            <a href="#" className="hover:text-[#0F2E2C] transition-colors">
+            <a href="/refund" className="hover:text-[#0F2E2C] transition-colors">
               Refund Policy
             </a>
-            <a href="#" className="hover:text-[#0F2E2C] transition-colors">
+            <a href="mailto:shane@giftheranapp.com" className="hover:text-[#0F2E2C] transition-colors">
               Contact
             </a>
           </div>
