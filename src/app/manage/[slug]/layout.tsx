@@ -9,6 +9,8 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   await params
 
   return {
+    title: 'App Manager — GiftHerAnApp',
+    description: 'Manage coupons, photos, and more.',
     appleWebApp: {
       capable: true,
       title: 'App Manager',

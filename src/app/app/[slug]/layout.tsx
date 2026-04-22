@@ -15,13 +15,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
   const { data: app } = await supabase
     .from('apps')
-    .select('icon_photo_url')
+    .select('icon_photo_url, her_name')
     .eq('her_slug', slug)
     .single()
 
   const iconUrl = app?.icon_photo_url || '/GiftHerAnApp_Logo_small.png'
+  const herName = app?.her_name || 'Her'
 
   return {
+    title: 'My App \u2764\uFE0F',
+    description: `${herName}'s personalized coupon app \u2014 powered by GiftHerAnApp`,
     appleWebApp: {
       capable: true,
       title: 'My App \u2764\uFE0F',
