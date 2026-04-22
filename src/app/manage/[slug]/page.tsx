@@ -192,7 +192,7 @@ export default function ManageDashboard() {
   const [hisPhotos, setHisPhotos] = useState<any[]>([])
   const [couplePhotos, setCouplePhotos] = useState<any[]>([])
 
-  function showToast(msg: string) { setToast(msg); setTimeout(() => setToast(null), 3000) }
+  function showToast(msg: string, duration = 3000) { setToast(msg); setTimeout(() => setToast(null), duration) }
 
   async function loadData() {
     const { data: appData, error: appError } = await supabase.from('apps').select('*').or(`her_slug.eq.${slug},his_slug.eq.${slug}`).single()
@@ -639,7 +639,7 @@ export default function ManageDashboard() {
                   <button key={photo.id} onClick={async () => {
                     await supabase.from('apps').update({ icon_photo_url: photo.photo_url }).eq('id', app.id)
                     setApp({ ...app, icon_photo_url: photo.photo_url })
-                    showToast('App icon updated!')
+                    showToast('App icon updated! She\u2019ll need to re-add the app to her home screen to see the new icon.', 5000)
                   }}
                     className={`aspect-square rounded-xl overflow-hidden border-2 transition-all ${
                       app.icon_photo_url === photo.photo_url ? 'border-blue-400 ring-2 ring-blue-400/30' : 'border-slate-600 hover:border-slate-500'
