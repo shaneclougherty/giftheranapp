@@ -115,8 +115,7 @@ export async function POST(request: NextRequest) {
       if (couponError) console.error('Coupon insert error:', couponError)
     }
 
-    console.log('Creating Stripe session...')
-    const session = await stripe.checkout.sessions.create({
+    const sessionConfig: Stripe.Checkout.SessionCreateParams = {
       allow_promotion_codes: true,
       payment_method_types: ['card'],
       line_items: [{
@@ -136,7 +135,9 @@ export async function POST(request: NextRequest) {
       metadata: {
         app_id: appId,
       },
-    })
+    }
+    console.log('Stripe session config:', JSON.stringify(sessionConfig, null, 2))
+    const session = await stripe.checkout.sessions.create(sessionConfig)
 
     return NextResponse.json({ url: session.url, sessionId: session.id })
   } catch (error: any) {

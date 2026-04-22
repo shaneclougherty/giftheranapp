@@ -93,6 +93,12 @@ export async function POST(request: NextRequest) {
 }
 
 function buildEmailHtml(herName: string, giftLink: string, appLink: string, manageLink: string): string {
+  const linkBox = (url: string) => `
+          <div style="background:#F0FCFA;border:1px solid #D8F0EC;border-radius:10px;padding:12px 14px;margin:0 0 12px;word-break:break-all;">
+            <a href="${url}" style="color:#0F2E2C;text-decoration:none;font-size:13px;line-height:1.4;">${url}</a>
+          </div>
+          <a href="${url}" style="display:block;text-align:center;padding:11px 20px;background:#5DD3C2;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;">Open</a>`
+
   return `<!DOCTYPE html>
 <html>
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"></head>
@@ -111,60 +117,53 @@ function buildEmailHtml(herName: string, giftLink: string, appLink: string, mana
       </div>
 
       <!-- Intro -->
-      <div style="padding:8px 24px 24px;text-align:center;">
-        <p style="margin:0;font-size:15px;color:#555;line-height:1.5;">Nice work — ${herName}'s app is built and ready to go. Here's everything you need.</p>
+      <div style="padding:8px 24px 28px;text-align:center;">
+        <p style="margin:0;font-size:15px;color:#5A7270;line-height:1.5;">Nice work — here are your links. Save this email.</p>
       </div>
 
-      <!-- Section 1: Send her the gift -->
-      <div style="padding:0 24px 24px;">
-        <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Send her the gift</p>
-          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">When you're ready, text her this link:</p>
-          <p style="margin:0;padding:10px 14px;background:#ffffff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#0F2E2C;word-break:break-all;"><a href="${giftLink}" style="color:#0F2E2C;text-decoration:none;">${giftLink}</a></p>
-          <p style="margin:10px 0 0;font-size:11px;color:#999;">This shows her a special gift reveal before she sets up her app.</p>
+      <!-- Section 1: Your links -->
+      <div style="padding:0 24px 8px;">
+        <p style="margin:0 0 20px;font-size:16px;font-weight:700;color:#0F2E2C;">Your links</p>
+
+        <!-- Gift link -->
+        <div style="margin-bottom:24px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0F2E2C;">Her gift link</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#5A7270;line-height:1.4;">Send her this link when you're ready. She'll see a gift reveal before setting up her app.</p>
+${linkBox(giftLink)}
+        </div>
+
+        <!-- App link -->
+        <div style="margin-bottom:24px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0F2E2C;">Her app link</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#5A7270;line-height:1.4;">If she ever needs to re-access her app directly. Save this in case she gets a new phone or needs to re-add it.</p>
+${linkBox(appLink)}
+        </div>
+
+        <!-- Manager link -->
+        <div style="margin-bottom:24px;">
+          <p style="margin:0 0 4px;font-size:14px;font-weight:600;color:#0F2E2C;">Your manager dashboard</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#5A7270;line-height:1.4;">Use this to manage her app — swap photos, add coupons, and see when she redeems.</p>
+${linkBox(manageLink)}
         </div>
       </div>
 
-      <!-- Section 2: Her app link -->
-      <div style="padding:0 24px 24px;">
-        <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Her app link</p>
-          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">If she ever needs to re-access her app directly:</p>
-          <p style="margin:0;padding:10px 14px;background:#ffffff;border:1px solid #d1d5db;border-radius:8px;font-size:13px;color:#0F2E2C;word-break:break-all;"><a href="${appLink}" style="color:#0F2E2C;text-decoration:none;">${appLink}</a></p>
-          <p style="margin:10px 0 0;font-size:11px;color:#999;">Save this in case she gets a new phone or needs to re-add the app.</p>
-        </div>
-      </div>
-
-      <!-- Section 3: Manager dashboard -->
-      <div style="padding:0 24px 24px;">
-        <div style="background:#f8f8f8;border-radius:12px;padding:20px;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Your manager dashboard</p>
-          <p style="margin:0 0 14px;font-size:13px;color:#555;line-height:1.4;">Use this link to manage her app — swap photos, add coupons, and see when she redeems:</p>
-          <a href="${manageLink}" style="display:block;text-align:center;padding:12px 20px;background:#0F2E2C;color:#ffffff;font-size:14px;font-weight:600;text-decoration:none;border-radius:10px;">Open Dashboard</a>
-          <p style="margin:10px 0 0;font-size:11px;color:#999;text-align:center;word-break:break-all;">${manageLink}</p>
-        </div>
-      </div>
-
-      <!-- Section 4: Add to home screen -->
+      <!-- Section 2: Add to home screen -->
       <div style="padding:0 24px 24px;">
         <div style="background:#f8f8f8;border-radius:12px;padding:20px;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">Add to home screen</p>
-          <p style="margin:0;font-size:13px;color:#555;line-height:1.4;">Both your dashboard and her app can be added to the home screen for easy access. Just open the link, tap Share, then tap "Add to Home Screen."</p>
+          <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#0F2E2C;">Add to home screen</p>
+          <p style="margin:0 0 14px;font-size:13px;color:#5A7270;line-height:1.4;">Both her app and your dashboard can be added to the home screen for easy access. Here's how:</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#0F2E2C;"><strong>Step 1:</strong> Open the link in your phone's browser</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#0F2E2C;"><strong>Step 2:</strong> Tap the Share button</p>
+          <p style="margin:0 0 6px;font-size:13px;color:#0F2E2C;"><strong>Step 3:</strong> Tap "Add to Home Screen"</p>
+          <p style="margin:0 0 12px;font-size:13px;color:#0F2E2C;"><strong>Step 4:</strong> Find and open the app on your home screen</p>
+          <p style="margin:0;font-size:12px;color:#5A7270;">These steps work for both her app and your manager dashboard.</p>
         </div>
       </div>
 
-      <!-- Section 5: What she'll see -->
-      <div style="padding:0 24px 24px;">
-        <div style="background:#f0fdfb;border-radius:12px;padding:20px;">
-          <p style="margin:0 0 6px;font-size:14px;font-weight:600;color:#0F2E2C;">What she'll see</p>
-          <p style="margin:0;font-size:13px;color:#555;line-height:1.4;">When she opens the gift link, she'll see a gift animation, then instructions to add her app to her home screen. It takes about 30 seconds.</p>
-        </div>
-      </div>
-
-      <!-- Section 6: Quick tips -->
+      <!-- Section 3: Quick tips -->
       <div style="padding:0 24px 28px;">
         <p style="margin:0 0 10px;font-size:14px;font-weight:600;color:#0F2E2C;">Quick tips</p>
-        <ul style="margin:0;padding:0 0 0 18px;font-size:13px;color:#555;line-height:1.8;">
+        <ul style="margin:0;padding:0 0 0 18px;font-size:13px;color:#5A7270;line-height:1.8;">
           <li>You can send her the gift link by text — it works best on her phone</li>
           <li>Add your manager dashboard to your home screen for easy access</li>
           <li>You'll get a text when she redeems a coupon</li>
